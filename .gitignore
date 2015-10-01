@@ -1,3 +1,7 @@
 # ignore eclipse files
 .project
 .settings/
+
+# ignore generated phonegap files
+platforms/
+plugins/
