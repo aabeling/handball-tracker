@@ -1,0 +1,16 @@
+.home-players.editing .edit {
+	display: block;
+	padding: 5px 5px 5px 5px;
+}
+
+.home-players .edit {
+	display: none;
+}
+
+.home-players.editing .view {
+	display: none;
+}
+
+.home-players .view {
+	display: block;
+}

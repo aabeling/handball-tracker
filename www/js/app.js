@@ -1,6 +1,10 @@
 (function() {
 
 	/**
+	 * MODELS
+	 */
+	
+	/**
 	 * Model for a player
 	 */
 	var PlayerModel = Backbone.Model.extend({
@@ -15,25 +19,18 @@
 	var PlayersCollection = Backbone.Collection.extend({
 
 		localStorage : new Backbone.LocalStorage("Players"),
-		model: PlayerModel,
-
+		model: PlayerModel
 	});
 
-	/* load the players */
 	var players = new PlayersCollection();
 	
 	players.on("add", function(player) {
 //		player.save();
 		console.log("player added: ", player);
 	});
-	
-	/* add a player */
-//	players.add([
-//	             {number: 1, name: "Lena"},
-//	             {number: 8, name: "Luka"},
-//	             {number: 7, name: "Jette"},
-//	             {number: 13, name: "Stina"}]);
-//	
+	players.on("change", function(player) {
+		console.log("player changed: ", player);
+	});
 	
 	/**
 	 * TEMPLATES
@@ -49,13 +46,27 @@
 	 */
 	var PlayerView = Backbone.View.extend({
 		
+		className: "player",
+		initialize: function() {
+			this.listenTo(this.model, 'change', this.render);
+		    //this.listenTo(this.model, 'destroy', this.remove);
+		},
 		render: function() {
 			
-			console.log("rendering player: ", this.model);
 			var html = playerItemTemplate(this.model.toJSON());
 		    this.$el.html(html);
 		    return this;
+		},
+		events: {
+			"change .edit": "updatePlayerFromInput"
+		},
+		updatePlayerFromInput: function(e) {
+			
+			var value = this.$("input").val();
+			this.model.set({name: value});
+			this.model.save();
 		}
+		
 	});
 
 	
@@ -65,19 +76,17 @@
 	var PlayersListView = Backbone.View.extend({
 		  el: '#home-players',
 		  
-		  initialize: function() {		    
-		      this.listenTo(players, 'add', this.addPlayerView);		      
+		  initialize: function() {		
+			  
+			  /* add a player view when added to the collection */
+		      this.listenTo(players, 'add', this.addPlayerView);			      
 		  },
 		  
-		  render: function() {
-			  
-			  console.log("rendering players");
-			  
-		  },
-		  
+		  /**
+		   * Adds a view for a player
+		   */
 		  addPlayerView: function(player) {
 			  
-			  console.log("players view addOne");
 			  var view = new PlayerView({model: player});
 		      this.$el.append(view.render().el);
 		  }
@@ -85,26 +94,42 @@
 	
 	var playersList = new PlayersListView({collection: players});
 
+	/**
+	 * View for the whole application
+	 */
 	var AppView = Backbone.View.extend({
 	
 		el: "#handball-tracker",
 		initialize: function() {
-			
-			console.log("AppView#initialize");			
+
+			players.fetch();
 		},
 		events: {
+		      "click #btn-edit-players": "toggleEditPlayersMode",
 		      "click #btn-new-player": "createNewPlayer"
 		},
-		createNewPlayer: function() {
-			  console.log("creating new player");
+		/**
+		 * Adds a new default player to the model
+		 */
+		createNewPlayer: function() {			  
 			  players.add(new PlayerModel());
+		},
+		/**
+		 * Toggles between view and edit mode
+		 */
+		toggleEditPlayersMode: function() {
+			
+			if (this.$(".home-players").hasClass("editing")) {
+				/* switch to view mode */
+				this.$(".home-players").removeClass("editing");
+				this.$("#btn-edit-players").html("Bearbeiten");
+			} else {
+				/* switch to edit mode */
+				this.$(".home-players").addClass("editing");
+				this.$("#btn-edit-players").html("Fertig");
+			}
 		}
 	});
 	var app = new AppView;
-	
-	console.log("fetching players");
-	players.fetch();
-	players.forEach(function(player) { console.log("player: ", player.toJSON()); });
-	
-	console.log("handball-tracker is ready");
+			
 })();
