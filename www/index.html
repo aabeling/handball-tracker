@@ -10,8 +10,7 @@
     <meta name="msapplication-tap-highlight" content="no" />
     <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
     
-    <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/jquery.mobile-1.4.0-beta.1.min.css" rel="stylesheet">
     
     <!-- app specific -->
     <link href="css/app.css" rel="stylesheet">
@@ -26,52 +25,42 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
-  <body id="handball-tracker" role="document">
-    
-    <div class="container" role="main">
-      <p>
-        <button class="btn btn-lg btn-primary" type="button" data-toggle="modal" data-target="#homeCountModal">Heim</button>
-        <button class="btn btn-lg btn-primary" type="button">Gast</button>
-      </p>
-    </div>
 
-    <!-- modal dialog to count a home goal -->
-    <div class="modal" id="homeCountModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Tor für Heimmannschaft</h4>
-          </div>
-          <div class="modal-body home-players">
-            <div id="home-players" class="list-group players home">
-              <!-- filled by player-item-template -->
-            </div>
-            <div class="btn-group">
-              <button id="btn-new-player" type="button" class="edit btn btn-primary">Neuer Spieler</button>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
-            <button id="btn-edit-players" type="button" class="btn btn-primary">Bearbeiten</button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <body id="handball-tracker">
     
-    <script type="text/template" id="player-item-template">
-		<button type="button" class="view list-group-item"><%= name %></button>		
-		<input class="edit" type="text" value="<%= name %>" />
-    </script>
+    <div data-role='page' id='home'>
+            <div data-theme='a' data-role='header'>
+                <h3>
+                    handball-tracker
+                </h3>
+            </div>
+            <div data-role='content'>
+              Content<br/>
+              <a href='#two' class="ui-btn ui-btn-inline" data-transition='slide'>page two</a>
+            </div>
+            <div data-theme='a' data-role='footer'>
+                <h3>Copyright banapple.de 2016</h3>
+            </div>
+        </div>
+
+        <div data-role='page' id='two'>
+            <div data-theme='a' data-role='header'>
+                <a href='#home' class='ui-btn-left' data-transition='slide' data-direction='reverse'>Back</a>
+                <h3>
+                    page two
+                </h3>
+            </div>
+            <div data-role='content'>
+                  content page 2
+            </div>
+        </div>
 
     <script type="text/javascript" src="cordova.js"></script>
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->    
-    <script src="js/jquery-1.11.3.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/underscore-min.js"></script>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/jquery.mobile-1.4.0-beta.1.min.js"></script>
     <script src="js/backbone-min.js"></script>
     <script src="js/backbone.localStorage-min.js"></script>
     <script src="js/app.js"></script>
   </body>
+
 </html>
