@@ -1,135 +1,123 @@
-(function() {
+
+/* Backbone initialisation */
+var models = {};
+(function(models) {
 
 	/**
 	 * MODELS
 	 */
-	
-	/**
-	 * Model for a player
-	 */
-	var PlayerModel = Backbone.Model.extend({
+
+	var GameModel = Backbone.Model.extend({
+
 		defaults : {
-			name : "neuer Spieler..."
+			goals : [ 0, 0 ]
 		}
 	});
 
-	/**
-	 * Collection of all players
-	 */
-	var PlayersCollection = Backbone.Collection.extend({
+	var game = new GameModel();
 
-		localStorage : new Backbone.LocalStorage("Players"),
-		model: PlayerModel
-	});
+	models.game = game;
 
-	var players = new PlayersCollection();
-	
-	players.on("add", function(player) {
-//		player.save();
-		console.log("player added: ", player);
-	});
-	players.on("change", function(player) {
-		console.log("player changed: ", player);
-	});
-	
-	/**
-	 * TEMPLATES
-	 */
-	var playerItemTemplate = _.template( $('#player-item-template').html() );
-
-	/**
-	 * VIEWS
-	 */
-	
-	/**
-	 * View for a player
-	 */
-	var PlayerView = Backbone.View.extend({
-		
-		className: "player",
-		initialize: function() {
-			this.listenTo(this.model, 'change', this.render);
-		    //this.listenTo(this.model, 'destroy', this.remove);
-		},
-		render: function() {
-			
-			var html = playerItemTemplate(this.model.toJSON());
-		    this.$el.html(html);
-		    return this;
-		},
-		events: {
-			"change .edit": "updatePlayerFromInput"
-		},
-		updatePlayerFromInput: function(e) {
-			
-			var value = this.$("input").val();
-			this.model.set({name: value});
-			this.model.save();
+	var GameEventModel = Backbone.Model.extend({
+		defaults : {
+			type : null,
+			team : null,
+			player : null
 		}
-		
 	});
 
+	var GameEventsCollection = Backbone.Collection.extend({
+		model : GameEventModel
+	});
+
+	var gameEvents = new GameEventsCollection();
+
+	models.gameEvents = gameEvents;
+
+})(models);
+
+var renderer = {};
+(function(renderer) {
+	
+	var goalEventTemplate = _.template("Tor für <%= team %>");
 	
 	/**
-	 * View of all players
+	 * Renders a game event
 	 */
-	var PlayersListView = Backbone.View.extend({
-		  el: '#home-players',
-		  
-		  initialize: function() {		
-			  
-			  /* add a player view when added to the collection */
-		      this.listenTo(players, 'add', this.addPlayerView);			      
-		  },
-		  
-		  /**
-		   * Adds a view for a player
-		   */
-		  addPlayerView: function(player) {
-			  
-			  var view = new PlayerView({model: player});
-		      this.$el.append(view.render().el);
-		  }
-		});
-	
-	var playersList = new PlayersListView({collection: players});
-
-	/**
-	 * View for the whole application
-	 */
-	var AppView = Backbone.View.extend({
-	
-		el: "#handball-tracker",
-		initialize: function() {
-
-			players.fetch();
-		},
-		events: {
-		      "click #btn-edit-players": "toggleEditPlayersMode",
-		      "click #btn-new-player": "createNewPlayer"
-		},
-		/**
-		 * Adds a new default player to the model
-		 */
-		createNewPlayer: function() {			  
-			  players.add(new PlayerModel());
-		},
-		/**
-		 * Toggles between view and edit mode
-		 */
-		toggleEditPlayersMode: function() {
-			
-			if (this.$(".home-players").hasClass("editing")) {
-				/* switch to view mode */
-				this.$(".home-players").removeClass("editing");
-				this.$("#btn-edit-players").html("Bearbeiten");
+	var renderGameEvent = function(gameEvent) {
+		
+		if (gameEvent.get('type') == 'goal') {
+			if (gameEvent.get('team') == 0) {
+				return goalEventTemplate({team : "Heim"});
 			} else {
-				/* switch to edit mode */
-				this.$(".home-players").addClass("editing");
-				this.$("#btn-edit-players").html("Fertig");
+				return goalEventTemplate({team : "Gast"});
 			}
 		}
+		
+		return "unknown game event";
+	};
+
+	renderer.renderGameEvent = renderGameEvent;
+	
+})(renderer);
+
+var handballTracker = {};
+(function(exports, models, renderer) {
+
+	models.game.on("change:goals", function() {
+		
+		/* adjust the score view */
+		var currentGoals = models.game.get('goals');
+		$('#goals_home').html(currentGoals[0]);
+		$('#goals_guest').html(currentGoals[1]);
 	});
-	var app = new AppView;
-			
-})();
+	
+	models.gameEvents.on("update", function(event) {
+	
+		/* adjust the game events view */
+		// TODO for now clear the elements and render them again
+		$('#game_events').empty();
+		models.gameEvents.forEach(function(gameEvent) {
+			var html = "<li>" + renderer.renderGameEvent(gameEvent) + "</li>";
+			$('#game_events').prepend(html);
+		});
+	});
+	
+	var addGoal = function(team) {
+		
+		if (team < 0 || team > 1) return;
+	
+		/* update the score */
+		var currentGoals = models.game.get('goals');
+		currentGoals[team]++;
+		models.game.set({ goals: currentGoals });
+		models.game.trigger("change:goals");
+		
+		/* add a game event */
+		models.gameEvents.add({type: 'goal', team: team});
+		
+	};
+	exports.addGoal = addGoal;
+
+
+//	var onPlayerSELECTED = FUNCTION(TEAM, PLAYERID) {
+//
+//		IF (STATE.PROGRESS.TYPE == 'COUNT_GOAL') {
+//			IF (STATE.PROGRESS.TEAM == 1) {
+//				STATE.GOALSHOME++;
+//				$('#GOALSHOME').HTML(STATE.GOALSHOME);
+//			} ELSE {
+//				STATE.GOALSGUEST++;
+//				$('#GOALSGUEST').HTML(STATE.GOALSGUEST);
+//			}
+//			$(":MOBILE-PAGECONTAINER").PAGECONTAINER("CHANGE", "#HOME", {
+//				TRANSITION : 'SLIDE',
+//				REVERSE : TRUE
+//			});
+//		}
+//	};
+//
+//	// EXPORTS.ONGOAL = ONGOAL;
+//	EXPORTS.ONPLAYerSelected = onPlayerSelected;
+
+})(handballTracker, models, renderer);
