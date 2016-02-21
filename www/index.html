@@ -60,7 +60,7 @@
         data-transition='slide'>Gast</a>
       
       <!-- list of game events -->
-      <ul data-role="listview" id="game_events">        
+      <ul data-role="listview" data-inset="true" id="game_events">        
       </ul>
     </div>
     <!-- no footer needed at the moment
@@ -91,6 +91,16 @@
     </div>
   </div>
 
+  <!-- underscore templates -->
+  <script type="text/template" id="goalEventTemplate">
+    <a href='javascript:handballTracker.selectPlayerForGoal();'
+       class="ui-btn ui-mini"
+       data-transition='slide'>
+	Tor für <%= team %> von 
+    <% if (!player) { %>Unbekannt</a><% } else { %><%= player %><% } %>
+    </a>
+  </script>
+  
   <script
     type="text/javascript"
     src="cordova.js"></script>
@@ -100,6 +110,8 @@
   <script src="js/backbone-min.js"></script>
   <script src="js/backbone.localStorage-min.js"></script>
   <script src="js/app.js"></script>
+  
+   
 </body>
 
 </html>
